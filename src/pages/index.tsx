@@ -2,10 +2,11 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { api } from "@/utils/api";
+import { SignInButton, SignOutButton, useAuth } from "@clerk/nextjs";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
+  const hello = api.example.hello.useQuery();
+  const { userId } = useAuth();
   return (
     <>
       <Head>
@@ -46,6 +47,19 @@ const Home: NextPage = () => {
             {hello.data ? hello.data.greeting : "Loading tRPC query..."}
           </p>
         </div>
+        {userId ? (
+          <SignOutButton>
+            <button className="rounded-full border-2 border-sky-500 bg-white p-4">
+              Sign Out
+            </button>
+          </SignOutButton>
+        ) : (
+          <SignInButton>
+            <button className="rounded-full border-2 border-sky-500 bg-white p-4">
+              Sign In
+            </button>
+          </SignInButton>
+        )}
       </main>
     </>
   );
