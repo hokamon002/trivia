@@ -3,5 +3,6 @@ import "dotenv/config";
 
 export default {
   schema: "./src/db/schema.ts",
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL_TEST,
+  // connectionString: process.env.DATABASE_URL,
 } satisfies Config;

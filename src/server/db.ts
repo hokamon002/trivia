@@ -5,7 +5,7 @@ import * as schema from "@/db/schema";
 
 // create the connection
 const connection = connect({
-  url: env.DATABASE_URL,
+  url: env.NODE_ENV === "test" ? env.DATABASE_URL_TEST : env.DATABASE_URL,
 });
 
 const drizzle = db(connection, { schema });
