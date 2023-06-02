@@ -1,4 +1,6 @@
+import { relations } from "drizzle-orm";
 import {
+  foreignKey,
   index,
   int,
   mysqlTable,
@@ -10,6 +12,7 @@ import {
 // declaring enum in database
 export const games = mysqlTable("games", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 256 }),
   name: text("name"),
 });
 
@@ -26,3 +29,14 @@ export const questions = mysqlTable(
     gameIdIdx: index("game_id_idx").on(question.gameId),
   })
 );
+
+export const gamesRelations = relations(games, ({ many }) => ({
+  questions: many(questions),
+}));
+
+export const questionsRelations = relations(questions, ({ one }) => ({
+  game: one(games, {
+    fields: [questions.gameId],
+    references: [games.id],
+  }),
+}));
