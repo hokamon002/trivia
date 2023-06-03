@@ -1,5 +1,5 @@
 import { type NextPage } from "next";
-import { api } from "@/utils/api";
+import { api } from "@/lib/api";
 
 const Home: NextPage = () => {
   const message = api.example.testAuth.useQuery();
