@@ -7,12 +7,15 @@
  * need to use are documented accordingly near the end.
  */
 
-import { TRPCError, initTRPC } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import superjson from "superjson";
-import { ZodError } from "zod";
 import drizzle from "../db";
 import { getAuth } from "@clerk/nextjs/server";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import type { NextRequest } from "next/server";
+
+type CreateContextOptions = {
+  headers: Headers;
+};
+
 /**
  * 1. CONTEXT
  *
@@ -20,8 +23,6 @@ import { getAuth } from "@clerk/nextjs/server";
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
-
-type CreateContextOptions = Record<string, never>;
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -33,8 +34,11 @@ type CreateContextOptions = Record<string, never>;
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-export const createInnerTRPCContext = (_opts: CreateContextOptions) => {
-  return { drizzle };
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
+  return {
+    headers: opts.headers,
+    drizzle,
+  };
 };
 
 /**
@@ -43,12 +47,14 @@ export const createInnerTRPCContext = (_opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = (opts: CreateNextContextOptions) => {
-  const { userId } = getAuth(opts.req);
-  const contextInner = createInnerTRPCContext({});
+export const createTRPCContext = (opts: FetchCreateContextFnOptions) => {
+  const req = opts.req as NextRequest;
+  const auth = getAuth(req);
   return {
-    ...contextInner,
-    userId,
+    ...createInnerTRPCContext({
+      headers: opts.req.headers,
+    }),
+    auth,
   };
 };
 
@@ -59,6 +65,12 @@ export const createTRPCContext = (opts: CreateNextContextOptions) => {
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
+
+import { TRPCError, initTRPC } from "@trpc/server";
+import superjson from "superjson";
+import { ZodError } from "zod";
+
+// import { headers } from "next/headers";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -99,13 +111,13 @@ export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.userId) {
+  if (!ctx.auth.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      userId: ctx.userId,
+      auth: ctx.auth,
     },
   });
 });
