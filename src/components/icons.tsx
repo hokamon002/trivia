@@ -2,7 +2,6 @@ import {
   type LucideProps,
   Moon,
   SunMedium,
-  Twitter,
   type Icon as LucideIcon,
 } from "lucide-react";
 
