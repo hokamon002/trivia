@@ -6,7 +6,7 @@ import { type ThemeProviderProps } from "next-themes/dist/types";
 
 const ThemeProvider = ({ children, ...props }: ThemeProviderProps) => {
   if (!localStorage.getItem("theme")) {
-    localStorage.setItem("theme", "dark");
+    localStorage.setItem("theme", "light");
   }
 
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
