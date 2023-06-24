@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { api } from "trpc-api";
 
-export default async function HomePage() {
-  const data = await api.example.hello.query();
+export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center pt-16">
       <div className="container flex flex-col items-center gap-12 px-4 ">
